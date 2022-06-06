@@ -7,7 +7,7 @@ import dotenv from "dotenv"
 dotenv.config();
 console.log(process.env.MONGO_URL)
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT;
 // const movies =[
 //     {"id":"100","name":"Iron man 2","poster":"https://m.media-amazon.com/images/M/MV5BMTM0MDgwNjMyMl5BMl5BanBnXkFtZTcwNTg3NzAzMw@@._V1_FMjpg_UX1000_.jpg","rating":7,"summary":"With the world now aware that he is Iron Man, billionaire inventor Tony Stark (Robert Downey Jr.) faces pressure from all sides to share his technology with the military. He is reluctant to divulge the secrets of his armored suit, fearing the information will fall into the wrong hands. With Pepper Potts (Gwyneth Paltrow) and Rhodes (Don Cheadle) by his side, Tony must forge new alliances and confront a powerful new enemy.","trailer":"https://www.youtube.com/embed/wKtcmiifycU"},
 //     {"id":"101","name":"No Country for Old Men","poster":"https://upload.wikimedia.org/wikipedia/en/8/8b/No_Country_for_Old_Men_poster.jpg","rating":8.1,"summary":"A hunter's life takes a drastic turn when he discovers two million dollars while strolling through the aftermath of a drug deal. He is then pursued by a psychopathic killer who wants the money.","trailer":"https://www.youtube.com/embed/38A__WT3-o0"},
@@ -87,6 +87,27 @@ app.get('/movies',async function (request, response) {
   const movies = await client.db("B33wd").collection("movies").find({}).toArray();
   response.send(movies)
 })
+
+
+app.delete('/movies/:id', async function (request, response) {
+  console.log(request.params);
+  const {id} = request.params;
+  const movie =await client.db("B33wd").collection("movies").deleteOne({id:id});
+  
+  movie.deletedCount>0 ? response.send(movie) : response.status(404).send({msg : "no such movie"})
+ 
+})
+
+
+app.put('/movies/:id', async function (request,response){
+  const data = request.body;
+  console.log(data);
+  const {id} = request.params;
+ 
+  // db.movies.updateOne({id = 100}{ $set:{rating:8.5}})
+  const result =await client.db("B33wd").collection("movies").updateOne({id:id},{$set:data});
+  response.send(result);
+});
 
 
 app.listen(PORT);
